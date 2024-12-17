@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>League of Legends Турнир</title>
     <link rel="stylesheet" href="styles.css">
+    
     <link rel="icon" type="image/png" href="icon.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -195,11 +196,13 @@
     <section id="registration" class="registration">
         <h2>Регистрация и Вход</h2>
         <div class="form-container">
-            <form class="auth-form">
-                <input type="text" placeholder="Имя пользователя" required>
-                <input type="password" placeholder="Пароль" required>
-                <button type="submit" class="submit-btn">Войти</button>
+            <form class="auth-form" action="register.php" method="POST">
+                <input type="text" name="username" placeholder="Имя пользователя" required>
+                <input type="password" name="password" placeholder="Пароль" required>
+                <button type="submit" class="submit-btn">Зарегистрироваться</button>
             </form>
+            
+            
             <div class="social-login">
 
                 <button class="social-btn google">Войти через Google</button>
