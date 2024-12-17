@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League of Legends Турнир</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+    <style>
+        /* Общие стили */
+        body {
+            margin: 0;
+            font-family: Comfortaa;
+            background-color: #0e0e0e;
+            color: #fff;
+        }
+        h2 {
+            text-align: center;
+            margin: 20px 0;
+            color: #e2b714;
+            text-transform: uppercase;
+        }
+        a, button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Главная страница */
+        .hero {
+            position: relative;
+            height: 100vh;
+            background: url('hero-image.jpg') no-repeat center center/cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .hero .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        .hero .content {
+            z-index: 2;
+            animation: fadeIn 1.5s ease;
+        }
+        .tournament-title {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .register-btn {
+            display: inline-block;
+            background-color: #e2b714;
+            color: #0e0e0e;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .register-btn:hover {
+            background-color: #f1c40f;
+            transform: scale(1.1);
+        }
+
+        /* Интерактивная анимация на фоне */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .animated-bg img {
+            position: absolute;
+            width: 150px;
+            opacity: 0.7;
+            animation: float 10s infinite ease-in-out;
+        }
+        .animated-bg img:nth-child(1) {
+            top: 10%;
+            left: 15%;
+            animation-delay: 0s;
+        }
+        .animated-bg img:nth-child(2) {
+            top: 30%;
+            left: 70%;
+            animation-delay: 2s;
+        }
+        .animated-bg img:nth-child(3) {
+            top: 60%;
+            left: 40%;
+            animation-delay: 4s;
+        }
+        .animated-bg img:nth-child(4) {
+            top: 80%;
+            left: 20%;
+            animation-delay: 6s;
+        }
+        .animated-bg img:nth-child(5) {
+            top: 50%;
+            left: 90%;
+            animation-delay: 8s;
+        }
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Регистрация */
+        .registration {
+            background: #222;
+            padding: 40px 10%;
+        }
+        .auth-form input, .submit-btn {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+        .auth-form input {
+            background: #333;
+            color: #fff;
+        }
+        .submit-btn {
+            background: #e2b714;
+            color: #0e0e0e;
+            font-weight: bold;
+        }
+        .submit-btn:hover {
+            background: #f1c40f;
+        }
+        .social-login {
+            text-align: center;
+        }
+        .social-btn {
+            display: inline-block;
+            margin: 5px;
+            background: #444;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+        .social-btn:hover {
+            background: #555;
+            transform: scale(1.1);
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Главная страница -->
+    <header class="main-header">
+        <div class="hero">
+            <div class="animated-bg">
+                <img src="RP.png" alt="background">
+                <img src="Hextech_Crafting_Key.png" alt="background">
+                <img src="BP.png" alt="background">
+                <img src="Hextech_Crafting_Chest.png" alt="background">
+                <img src="lol_hextech_crafting_masterwork_chest.png" alt="background">
+            </div>
+            <div class="overlay"></div>
+            <div class="content">
+                <h1 class="tournament-title">Добро пожаловать на Турнир TBS !</h1>
+                <p class="description">Прими участие в эпическом сражении за славу и награды!</p>
+                <a href="#registration" class="register-btn">Регистрация</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Регистрация и Вход -->
+    <section id="registration" class="registration">
+        <h2>Регистрация и Вход</h2>
+        <div class="form-container">
+            <form class="auth-form">
+                <input type="text" placeholder="Имя пользователя" required>
+                <input type="password" placeholder="Пароль" required>
+                <button type="submit" class="submit-btn">Войти</button>
+            </form>
+            <div class="social-login">
+                <button class="social-btn facebook">Войти через Facebook</button>
+                <button class="social-btn google">Войти через Google</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал -->
+    <footer class="footer">
+        <p>&copy; 2024 </p>
+    </footer>
+</body>
+</html>
