@@ -1,218 +1,128 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League of Legends Турнир</title>
-    <link rel="stylesheet" href="styles.css">
-    
-    <link rel="icon" type="image/png" href="icon.png">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
-    <style>
-        /* Общие стили */
-        body {
-            margin: 0;
-            font-family: "Comfortaa", sans-serif;
-            background-color: #0e0e0e;
-            color: #fff;
-        }
-        h2 {
-            text-align: center;
-            margin: 20px 0;
-            color: #e2b714;
-            text-transform: uppercase;
-        }
-        a, button {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        /* Главная страница */
-        .hero {
-            position: relative;
-            height: 100vh;
-            background: url('hero-image.jpg') no-repeat center center/cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            overflow: hidden;
-        }
-        .hero .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-        }
-        .hero .content {
-            z-index: 2;
-            animation: fadeIn 1.5s ease;
-        }
-        .tournament-title {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .register-btn {
-            display: inline-block;
-            background-color: #e2b714;
-            color: #0e0e0e;
-            padding: 10px 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .register-btn:hover {
-            background-color: #f1c40f;
-            transform: scale(1.1);
-        }
-
-        /* Интерактивная анимация на фоне */
-        .animated-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        .animated-bg img {
-            position: absolute;
-            width: 150px;
-            opacity: 0.7;
-            animation: float 10s infinite ease-in-out;
-        }
-        .animated-bg img:nth-child(1) {
-            top: 10%;
-            left: 15%;
-            animation-delay: 0s;
-        }
-        .animated-bg img:nth-child(2) {
-            top: 30%;
-            left: 70%;
-            animation-delay: 2s;
-        }
-        .animated-bg img:nth-child(3) {
-            top: 60%;
-            left: 40%;
-            animation-delay: 4s;
-        }
-        .animated-bg img:nth-child(4) {
-            top: 80%;
-            left: 20%;
-            animation-delay: 6s;
-        }
-        .animated-bg img:nth-child(5) {
-            top: 50%;
-            left: 90%;
-            animation-delay: 8s;
-        }
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        /* Регистрация */
-        .registration {
-            background: #222;
-            padding: 40px 10%;
-        }
-        .auth-form input, .submit-btn {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-        }
-        .auth-form input {
-            background: #333;
-            color: #fff;
-        }
-        .submit-btn {
-            background: #e2b714;
-            color: #0e0e0e;
-            font-weight: bold;
-        }
-        .submit-btn:hover {
-            background: #f1c40f;
-        }
-        .social-login {
-            text-align: center;
-        }
-        .social-btn {
-            display: inline-block;
-            margin: 5px;
-            background: #444;
-            color: #fff;
-            padding: 10px 15px;
-            border-radius: 5px;
-        }
-        .social-btn:hover {
-            background: #555;
-            transform: scale(1.1);
-        }
-
-        /* Анимации */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
-    </style>
+    <meta name="viewport" , content="width=device-width, initial-scale=1.0">
+    <title>Reptile Run</title>
+    <link rel="stylesheet" href="snake.css">
+    <script src="snake.js"></script>
 </head>
+
+
+
+<style>
+body {
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+    background: #afed11;
+}
+</style>
+<script>
+    
+var blockSize = 25;
+var rows = 20;
+var cols = 20;
+var board;
+var context;
+
+var snakeX = blockSize * 5;
+var snakeY = blockSize * 5;
+
+var velocityX = 0;
+var velocityY = 0;
+
+var snakeBody = [];
+
+var foodX;
+var foodY;
+var gameOver = false;
+window.onload = function () {
+    board = document.getElementById("board");
+    board.height = rows * blockSize;
+    board.width = cols * blockSize;
+    context = board.getContext("2d"); //used for drawing on the board
+    placeFood();
+    document.addEventListener("keyup", changeDirection);
+    setInterval(update, 1000 / 10);
+}
+
+function update() {
+    if (gameOver) {
+        return;
+    }
+
+    context.fillStyle = "black";
+    context.fillRect(0, 0, board.width, board.height);
+
+    context.fillStyle = "red";
+    context.fillRect(foodX, foodY, blockSize, blockSize);
+
+    if (snakeX == foodX && snakeY == foodY) {
+        snakeBody.push([foodX, foodY]);
+        placeFood();
+    }
+
+    for (let i = snakeBody.length - 1; i > 0; i--) {
+        snakeBody[i] = snakeBody[i - 1];
+    }
+    if (snakeBody.length) {
+        snakeBody[0] = [snakeX, snakeY];
+    }
+
+    context.fillStyle = "lime";
+    snakeX += velocityX * blockSize;
+    snakeY += velocityY * blockSize;
+    context.fillRect(snakeX, snakeY, blockSize, blockSize);
+    for (let i = 0; i < snakeBody.length; i++) {
+        context.fillRect(snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
+    }
+
+    //game over conditions
+    if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize) {
+        gameOver = true;
+        alert("Game Over");
+    }
+
+    for (let i = 0; i < snakeBody.length; i++) {
+        if (snakeX == snakeBody[i][0] && snakeY == snakeBody[i][1]) {
+            gameOver = true;
+            alert("Game Over");
+        }
+    }
+}
+
+function changeDirection(e) {
+    if (e.code == "ArrowUp" && velocityY != 1) {
+        velocityX = 0;
+        velocityY = -1;
+    }
+    else if (e.code == "ArrowDown" && velocityY != -1) {
+        velocityX = 0;
+        velocityY = 1;
+    }
+    else if (e.code == "ArrowLeft" && velocityX != 1) {
+        velocityX = -1;
+        velocityY = 0;
+    }
+    else if (e.code == "ArrowRight" && velocityX != -1) {
+        velocityX = 1;
+        velocityY = 0;
+    }
+}
+
+
+function placeFood() {
+
+    foodX = Math.floor(Math.random() * cols) * blockSize;
+    foodY = Math.floor(Math.random() * rows) * blockSize;
+}
+
+</script>
 <body>
-    <!-- Главная страница -->
-    <header class="main-header">
-        <div class="hero">
-            <div class="animated-bg">
-                <img src="RP.png" alt="background">
-                <img src="Hextech_Crafting_Key.png" alt="background">
-                <img src="BP.png" alt="background">
-                <img src="Hextech_Crafting_Chest.png" alt="background">
-                <img src="lol_hextech_crafting_masterwork_chest.png" alt="background">
-            </div>
-            <div class="overlay"></div>
-            <div class="content">
-                <h1 class="tournament-title">Добро пожаловать на Турнир TBS !</h1>
-                <p class="description">Прими участие в эпическом сражении за славу и награды!</p>
-                <a href="#registration" class="register-btn">Регистрация</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Регистрация и Вход -->
-    <section id="registration" class="registration">
-        <h2>Регистрация и Вход</h2>
-        <div class="form-container">
-            <form class="auth-form" action="register.php" method="POST">
-                <input type="text" name="username" placeholder="Имя пользователя" required>
-                <input type="password" name="password" placeholder="Пароль" required>
-                <button type="submit" class="submit-btn">Зарегистрироваться</button>
-            </form>
-            
-            
-            <div class="social-login">
-
-                <button class="social-btn google">Войти через Google</button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Подвал -->
-    <footer class="footer">
-        <p>&copy; 2024 </p>
-    </footer>
+    <h1>Reptile Run</h1>
+    <canvas id="board"></canvas>
+    <h2>Instructions: Move the snake within the box and eat food to increase size</h2>
 </body>
+
 </html>
