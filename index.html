@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reptile Run</title>
+    <title>Змейка блть</title>
     <link rel="stylesheet" href="snake.css">
     <script src="snake.js"></script>
     <style>
@@ -15,8 +15,8 @@
         }
 
         .control-button {
-            padding: 20px 30px;
-            margin: 10px;
+            padding: 10px 20px;
+            margin: 5px;
             font-size: 16px;
             cursor: pointer;
             background-color: #fff;
@@ -27,15 +27,20 @@
 </head>
 
 <body>
+    <div>
+        
+        <button class="control-button" id="resetButton">Reset Game</button>
+    </div>
     <h1>Змейка блть</h1>
     <canvas id="board"></canvas>
-  
+   
 
     <div>
         <button class="control-button" id="upButton">Up</button><br>
         <button class="control-button" id="leftButton">Left</button>
         <button class="control-button" id="rightButton">Right</button><br>
         <button class="control-button" id="downButton">Down</button>
+
     </div>
 
     <script>
@@ -45,8 +50,8 @@
         var board;
         var context;
 
-        var snakeX = blockSize * 5;
-        var snakeY = blockSize * 5;
+        var snakeX;
+        var snakeY;
 
         var velocityX = 0;
         var velocityY = 0;
@@ -59,10 +64,12 @@
 
         window.onload = function () {
             board = document.getElementById("board");
-            board.height = rows * blockSize;
             board.width = cols * blockSize;
+            board.height = rows * blockSize;
             context = board.getContext("2d");
-            placeFood();
+            
+            resetGame();
+
             document.addEventListener("keyup", changeDirection);
             setInterval(update, 1000 / 10);
 
@@ -71,6 +78,18 @@
             document.getElementById("downButton").addEventListener("click", () => changeDirection({ code: "ArrowDown" }));
             document.getElementById("leftButton").addEventListener("click", () => changeDirection({ code: "ArrowLeft" }));
             document.getElementById("rightButton").addEventListener("click", () => changeDirection({ code: "ArrowRight" }));
+            document.getElementById("resetButton").addEventListener("click", resetGame);
+        }
+
+        function resetGame() {
+            snakeX = blockSize * 5;
+            snakeY = blockSize * 5;
+            velocityX = 0;
+            velocityY = 0;
+            snakeBody = [];
+            gameOver = false;
+            placeFood();
+            context.clearRect(0, 0, board.width, board.height);
         }
 
         function update() {
@@ -104,7 +123,7 @@
                 context.fillRect(snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
             }
 
-            if (snakeX < 0 || snakeX > cols * blockSize || snakeY < 0 || snakeY > rows * blockSize) {
+            if (snakeX < 0 || snakeX >= cols * blockSize || snakeY < 0 || snakeY >= rows * blockSize) {
                 gameOver = true;
                 alert("Game Over");
             }
