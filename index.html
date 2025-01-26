@@ -1,162 +1,402 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Змейка блть</title>
-    <link rel="stylesheet" href="snake.css">
-    <script src="snake.js"></script>
-    <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            text-align: center;
-            background: #afed11;
-        }
-
-        .control-button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #fff;
-            border: 2px solid #000;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <title>Colorful Tetris Match-3 (Writes Result to 1.json)</title>
+  <style>
+    /* ===== CSS ===== */
+    body {
+      margin: 0;
+      background: #333;
+      color: #fff;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    h1 {
+      margin-top: 20px;
+    }
+    
+    #game-container {
+      margin: 20px;
+      position: relative;
+    }
+    
+    #game-canvas {
+      background: #111;
+      display: block;
+      border: 2px solid #fff;
+    }
+    
+    #score {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
-
 <body>
-    <div>
-        
-        <button class="control-button" id="resetButton">Reset Game</button>
-    </div>
-    <h1>Змейка блть</h1>
-    <canvas id="board"></canvas>
-   
 
-    <div>
-        <button class="control-button" id="upButton">Up</button><br>
-        <button class="control-button" id="leftButton">Left</button>
-        <button class="control-button" id="rightButton">Right</button><br>
-        <button class="control-button" id="downButton">Down</button>
+  <h1>Colorful Tetris (Match-3)</h1>
+  <div id="score">Score: <span id="score-value">0</span></div>
+  <div id="game-container">
+    <canvas id="game-canvas" width="200" height="400"></canvas>
+  </div>
 
-    </div>
+  <script>
+    /* ===== JAVASCRIPT ===== */
 
-    <script>
-        var blockSize = 25;
-        var rows = 20;
-        var cols = 20;
-        var board;
-        var context;
+    // ---------------------
+    // Game Config
+    // ---------------------
+    const COLS = 10;           // number of columns
+    const ROWS = 20;           // number of rows
+    const BLOCK_SIZE = 20;     // pixel size of each cell
+    const MATCH_COUNT = 3;     // number of same-colored blocks needed to clear
+    const CANVAS = document.getElementById("game-canvas");
+    const CTX = CANVAS.getContext("2d");
+    const SCORE_ELEM = document.getElementById("score-value");
+    
+    // The game board: 2D array (rows x cols). Each cell holds a color string or null if empty.
+    let board = createEmptyBoard(ROWS, COLS);
+    
+    // We'll ask the user for their nickname at the start
+    let nickname = null;
+    
+    let score = 0;
+    let currentPiece = null; 
+    let gameOver = false;
+    let dropInterval = 1000; // ms between automatic drops
+    let lastDropTime = 0; 
+    
+    // Tetris shapes as sets of relative coordinates (row, col).
+    const SHAPES = [
+      // Square (2x2)
+      [ [0,0], [0,1], [1,0], [1,1] ],
+      // Line (4x1)
+      [ [0,0], [0,1], [0,2], [0,3] ],
+      // T-shape
+      [ [0,0], [0,1], [0,2], [1,1] ],
+      // L-shape
+      [ [0,0], [1,0], [2,0], [2,1] ],
+      // S-shape
+      [ [0,1], [0,2], [1,0], [1,1] ],
+    ];
 
-        var snakeX;
-        var snakeY;
+    // Directions for adjacency checks (up, down, left, right)
+    const DIRECTIONS = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1]
+    ];
 
-        var velocityX = 0;
-        var velocityY = 0;
+    // ---------------------
+    // On Load, ask for nickname & start
+    // ---------------------
+    window.onload = () => {
+      nickname = prompt("Please enter your nickname:") || "Guest";
+      document.addEventListener("keydown", handleKeyPress);
+      spawnNewPiece();
+      requestAnimationFrame(update);
+    };
 
-        var snakeBody = [];
+    function update(timestamp) {
+      if (gameOver) return;
 
-        var foodX;
-        var foodY;
-        var gameOver = false;
+      // Drop piece automatically
+      if (timestamp - lastDropTime > dropInterval) {
+        moveDown();
+        lastDropTime = timestamp;
+      }
 
-        window.onload = function () {
-            board = document.getElementById("board");
-            board.width = cols * blockSize;
-            board.height = rows * blockSize;
-            context = board.getContext("2d");
-            
-            resetGame();
+      drawBoard();
+      drawCurrentPiece();
+      requestAnimationFrame(update);
+    }
 
-            document.addEventListener("keyup", changeDirection);
-            setInterval(update, 1000 / 10);
-
-            // Add touch button event listeners
-            document.getElementById("upButton").addEventListener("click", () => changeDirection({ code: "ArrowUp" }));
-            document.getElementById("downButton").addEventListener("click", () => changeDirection({ code: "ArrowDown" }));
-            document.getElementById("leftButton").addEventListener("click", () => changeDirection({ code: "ArrowLeft" }));
-            document.getElementById("rightButton").addEventListener("click", () => changeDirection({ code: "ArrowRight" }));
-            document.getElementById("resetButton").addEventListener("click", resetGame);
+    // ---------------------
+    // Board / Pieces
+    // ---------------------
+    function createEmptyBoard(rows, cols) {
+      let arr = [];
+      for (let r = 0; r < rows; r++) {
+        let row = [];
+        for (let c = 0; c < cols; c++) {
+          row.push(null);
         }
+        arr.push(row);
+      }
+      return arr;
+    }
 
-        function resetGame() {
-            snakeX = blockSize * 5;
-            snakeY = blockSize * 5;
-            velocityX = 0;
-            velocityY = 0;
-            snakeBody = [];
-            gameOver = false;
-            placeFood();
-            context.clearRect(0, 0, board.width, board.height);
+    function spawnNewPiece() {
+      const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      
+      // Each block in the shape gets its own random color
+      let blocks = shape.map(() => getRandomColor());
+
+      currentPiece = {
+        row: 0,
+        col: Math.floor(COLS / 2) - 1,
+        shape: shape,
+        colors: blocks
+      };
+      
+      // If the piece cannot be placed at spawn, game over
+      if (collision(currentPiece, 0, 0)) {
+        gameOver = true;
+        alert("Game Over!");
+        // Save data to server
+        saveResultToServer();
+      }
+    }
+
+    function drawBoard() {
+      // Clear canvas
+      CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+      // Draw placed cells
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (board[r][c]) {
+            drawCell(c, r, board[r][c]);
+          }
         }
+      }
+    }
 
-        function update() {
-            if (gameOver) {
-                return;
-            }
+    function drawCurrentPiece() {
+      if (!currentPiece) return;
+      const { row, col, shape, colors } = currentPiece;
 
-            context.fillStyle = "black";
-            context.fillRect(0, 0, board.width, board.height);
+      shape.forEach((block, index) => {
+        const [br, bc] = block;
+        const cellRow = row + br;
+        const cellCol = col + bc;
+        drawCell(cellCol, cellRow, colors[index]);
+      });
+    }
 
-            context.fillStyle = "red";
-            context.fillRect(foodX, foodY, blockSize, blockSize);
+    function drawCell(x, y, color) {
+      CTX.fillStyle = color;
+      CTX.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+      // Optional outline
+      CTX.strokeStyle = "#333";
+      CTX.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
 
-            if (snakeX == foodX && snakeY == foodY) {
-                snakeBody.push([foodX, foodY]);
-                placeFood();
-            }
+    // ---------------------
+    // Movement & Rotation
+    // ---------------------
+    function moveDown() {
+      if (!currentPiece) return;
+      if (!collision(currentPiece, 1, 0)) {
+        currentPiece.row++;
+      } else {
+        // Place piece on board
+        placePiece();
+        // Check for matches
+        checkMatchesAndClear();
+        // Spawn new piece
+        spawnNewPiece();
+      }
+    }
 
-            for (let i = snakeBody.length - 1; i > 0; i--) {
-                snakeBody[i] = snakeBody[i - 1];
-            }
-            if (snakeBody.length) {
-                snakeBody[0] = [snakeX, snakeY];
-            }
+    function moveLeft() {
+      if (!collision(currentPiece, 0, -1)) {
+        currentPiece.col--;
+      }
+    }
 
-            context.fillStyle = "lime";
-            snakeX += velocityX * blockSize;
-            snakeY += velocityY * blockSize;
-            context.fillRect(snakeX, snakeY, blockSize, blockSize);
-            for (let i = 0; i < snakeBody.length; i++) {
-                context.fillRect(snakeBody[i][0], snakeBody[i][1], blockSize, blockSize);
-            }
+    function moveRight() {
+      if (!collision(currentPiece, 0, 1)) {
+        currentPiece.col++;
+      }
+    }
 
-            if (snakeX < 0 || snakeX >= cols * blockSize || snakeY < 0 || snakeY >= rows * blockSize) {
-                gameOver = true;
-                alert("Game Over");
-            }
+    function rotatePiece() {
+      // Naive rotation around shape's origin
+      const shape = currentPiece.shape.map(([r, c]) => [c, -r]);
+      const oldShape = currentPiece.shape;
+      currentPiece.shape = shape;
 
-            for (let i = 0; i < snakeBody.length; i++) {
-                if (snakeX == snakeBody[i][0] && snakeY == snakeBody[i][1]) {
-                    gameOver = true;
-                    alert("Game Over");
-                }
-            }
+      // Revert if it collides
+      if (collision(currentPiece, 0, 0)) {
+        currentPiece.shape = oldShape;
+      }
+    }
+
+    function collision(piece, dr, dc) {
+      const { row, col, shape } = piece;
+      for (let i = 0; i < shape.length; i++) {
+        const [br, bc] = shape[i];
+        const newR = row + br + dr;
+        const newC = col + bc + dc;
+        // Check boundaries
+        if (newR < 0 || newR >= ROWS || newC < 0 || newC >= COLS) {
+          return true;
         }
-
-        function changeDirection(e) {
-            if (e.code == "ArrowUp" && velocityY != 1) {
-                velocityX = 0;
-                velocityY = -1;
-            } else if (e.code == "ArrowDown" && velocityY != -1) {
-                velocityX = 0;
-                velocityY = 1;
-            } else if (e.code == "ArrowLeft" && velocityX != 1) {
-                velocityX = -1;
-                velocityY = 0;
-            } else if (e.code == "ArrowRight" && velocityX != -1) {
-                velocityX = 1;
-                velocityY = 0;
-            }
+        // Check existing block
+        if (board[newR][newC]) {
+          return true;
         }
+      }
+      return false;
+    }
 
-        function placeFood() {
-            foodX = Math.floor(Math.random() * cols) * blockSize;
-            foodY = Math.floor(Math.random() * rows) * blockSize;
+    function placePiece() {
+      const { row, col, shape, colors } = currentPiece;
+      shape.forEach((block, index) => {
+        const [br, bc] = block;
+        const r = row + br;
+        const c = col + bc;
+        board[r][c] = colors[index];
+      });
+    }
+
+    // ---------------------
+    // Match-3 Clearing
+    // ---------------------
+    function checkMatchesAndClear() {
+      let toRemove = [];
+
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const color = board[r][c];
+          if (!color) continue;
+
+          const connectedCells = getConnectedCells(r, c, color);
+          if (connectedCells.length >= MATCH_COUNT) {
+            toRemove = toRemove.concat(connectedCells);
+          }
         }
-    </script>
+      }
+
+      // Remove duplicates
+      const uniqueRemovals = Array.from(new Set(toRemove.map(cell => cell.join(','))))
+        .map(str => str.split(',').map(Number));
+
+      // Clear them out
+      uniqueRemovals.forEach(([rr, cc]) => {
+        board[rr][cc] = null;
+      });
+
+      if (uniqueRemovals.length > 0) {
+        score += uniqueRemovals.length;
+        SCORE_ELEM.textContent = score;
+        applyGravity();
+        checkMatchesAndClear();
+      }
+    }
+
+    function getConnectedCells(row, col, color) {
+      let stack = [[row, col]];
+      let connected = [];
+      let visited = new Set([`${row},${col}`]);
+
+      while (stack.length) {
+        const [r, c] = stack.pop();
+        connected.push([r, c]);
+        for (let [dr, dc] of DIRECTIONS) {
+          const rr = r + dr;
+          const cc = c + dc;
+          if (
+            rr >= 0 && rr < ROWS &&
+            cc >= 0 && cc < COLS &&
+            board[rr][cc] === color &&
+            !visited.has(`${rr},${cc}`)
+          ) {
+            visited.add(`${rr},${cc}`);
+            stack.push([rr, cc]);
+          }
+        }
+      }
+      return connected;
+    }
+
+    function applyGravity() {
+      for (let c = 0; c < COLS; c++) {
+        let writeRow = ROWS - 1;
+        for (let r = ROWS - 1; r >= 0; r--) {
+          if (board[r][c]) {
+            board[writeRow][c] = board[r][c];
+            writeRow--;
+          }
+        }
+        for (let r = writeRow; r >= 0; r--) {
+          board[r][c] = null;
+        }
+      }
+    }
+
+    // ---------------------
+    // Input Handling
+    // ---------------------
+    function handleKeyPress(e) {
+      if (!currentPiece) return;
+      switch(e.key) {
+        case "ArrowLeft":
+          moveLeft();
+          break;
+        case "ArrowRight":
+          moveRight();
+          break;
+        case "ArrowDown":
+          moveDown();
+          break;
+        case "ArrowUp":
+          rotatePiece();
+          break;
+        default:
+          break;
+      }
+    }
+
+    // ---------------------
+    // Utilities
+    // ---------------------
+    function getRandomColor() {
+      const colors = [
+        "#FF0000", // Red
+        "#00FF00", // Green
+        "#0000FF", // Blue
+        "#FFFF00", // Yellow
+        "#FF00FF"  // Magenta / Purple
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    // ---------------------
+    // Save to Server
+    // ---------------------
+    function saveResultToServer() {
+      const now = new Date().toLocaleString();
+      const data = {
+        nickname: nickname,
+        result: score,
+        time: now
+      };
+
+      fetch("/api/save-result", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to save result to server");
+        }
+        return res.json();
+      })
+      .then((json) => {
+        console.log("Server response:", json);
+      })
+      .catch((err) => {
+        console.error("Error saving result:", err);
+      });
+    }
+  </script>
 </body>
-
 </html>
