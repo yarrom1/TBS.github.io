@@ -7,7 +7,7 @@ function saveResultToServer() {
   };
 
   // Replace this with your actual Railway URL:
-  fetch("https://yarrom1.github.io/TBS.github.io/", {
+  fetch("tbsgithubio.railway.internal", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
