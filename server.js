@@ -7,7 +7,7 @@ function saveResultToServer() {
   };
 
   // Replace this with your actual Railway URL:
-  fetch("https://tetris-backend.up.railway.app/api/save-result", {
+  fetch("https://yarrom1.github.io/TBS.github.io/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
