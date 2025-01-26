@@ -7,7 +7,7 @@ const app = express();
 
 // Railway автоматически задаёт process.env.PORT.
 // Локально можно использовать 3000, если PORT не задан.
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Позволяем серверу парсить JSON-тело запросов
 app.use(express.json());
