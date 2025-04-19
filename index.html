@@ -1,402 +1,339 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title></title>
-  <style>
-    /* ===== CSS ===== */
-    body {
-      margin: 0;
-      background: #333;
-      color: #fff;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    h1 {
-      margin-top: 20px;
-    }
-    
-    #game-container {
-      margin: 20px;
-      position: relative;
-    }
-    
-    #game-canvas {
-      background: #111;
-      display: block;
-      border: 2px solid #fff;
-    }
-    
-    #score {
-      font-size: 1.2rem;
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пасхальное Поздравление</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive;
+            background-color: #FFF5E6;
+            background-image: radial-gradient(#FFD700 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #8B4513;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(139, 69, 19, 0.2);
+            max-width: 600px;
+            width: 90%;
+            border: 3px dashed #FF69B4;
+        }
+
+        h1 {
+            color: #FF1493;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 0 #FFD700;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background: linear-gradient(to bottom, #FF69B4, #FF1493);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 0 #C71585;
+            transition: all 0.2s;
+            margin-bottom: 2rem;
+            font-family: inherit;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #C71585;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #C71585;
+        }
+
+        .egg-field {
+            position: relative;
+            height: 200px;
+            margin: 2rem 0;
+        }
+
+        .egg {
+            position: absolute;
+            font-size: 4rem;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2;
+            transform-origin: center;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.3));
+        }
+
+        .left-egg {
+            left: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .right-egg {
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .collision-point {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1;
+        }
+
+        .message {
+            font-size: 1.5rem;
+            min-height: 2rem;
+            color: #8B4513;
+            font-weight: bold;
+            margin-top: 1rem;
+            padding: 10px;
+            background-color: rgba(255, 215, 0, 0.2);
+            border-radius: 10px;
+            border-left: 3px solid #FF1493;
+        }
+
+        @keyframes eggCrack {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-15deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.1) rotate(15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        @keyframes eggBreak {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .crack {
+            animation: eggCrack 0.5s ease-in-out;
+        }
+
+        .break {
+            animation: eggBreak 0.5s forwards;
+        }
+
+        .egg-shell {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0;
+            z-index: 1;
+            transition: all 0.5s;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
+        }
+
+        .paschal-decor {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: float 3s ease-in-out infinite;
+            opacity: 0.7;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .banner {
+            background: linear-gradient(to right, #FF69B4, #FF8C00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
 
-  <h1>Colorful Tetris (Match-3)</h1>
-  <div id="score">Score: <span id="score-value">0</span></div>
-  <div id="game-container">
-    <canvas id="game-canvas" width="200" height="400"></canvas>
-  </div>
+        <h1>Христос Воскрес!</h1>
 
-  <script>
-    /* ===== JAVASCRIPT ===== */
+        
+        <button id="collideBtn">Стукнемся яйцами?</button>
+        
+        <div class="egg-field">
+            <!-- Пасхальный декор -->
+            <div class="paschal-decor" style="left:5%;top:20%">🐰</div>
+            <div class="paschal-decor" style="right:5%;top:30%">🌸</div>
+            <div class="paschal-decor" style="left:15%;top:70%">🐣</div>
+            <div class="paschal-decor" style="right:15%;bottom:10%">🌷</div>
+            
+            <!-- Основные яйца -->
+            <div class="egg left-egg">🥚</div>
+            <div class="egg right-egg">🥚</div>
+            <div class="collision-point">💥</div>
+            <div class="egg-shell" id="shell1">🍳</div>
+            <div class="egg-shell" id="shell2">🍳</div>
+        </div>
+        
+        <div class="message" id="message">Нажмите кнопку, чтобы начать!</div>
+    </div>
 
-    // ---------------------
-    // Game Config
-    // ---------------------
-    const COLS = 10;           // number of columns
-    const ROWS = 20;           // number of rows
-    const BLOCK_SIZE = 20;     // pixel size of each cell
-    const MATCH_COUNT = 3;     // number of same-colored blocks needed to clear
-    const CANVAS = document.getElementById("game-canvas");
-    const CTX = CANVAS.getContext("2d");
-    const SCORE_ELEM = document.getElementById("score-value");
-    
-    // The game board: 2D array (rows x cols). Each cell holds a color string or null if empty.
-    let board = createEmptyBoard(ROWS, COLS);
-    
-    // We'll ask the user for their nickname at the start
-    let nickname = null;
-    
-    let score = 0;
-    let currentPiece = null; 
-    let gameOver = false;
-    let dropInterval = 1000; // ms between automatic drops
-    let lastDropTime = 0; 
-    
-    // Tetris shapes as sets of relative coordinates (row, col).
-    const SHAPES = [
-      // Square (2x2)
-      [ [0,0], [0,1], [1,0], [1,1] ],
-      // Line (4x1)
-      [ [0,0], [0,1], [0,2], [0,3] ],
-      // T-shape
-      [ [0,0], [0,1], [0,2], [1,1] ],
-      // L-shape
-      [ [0,0], [1,0], [2,0], [2,1] ],
-      // S-shape
-      [ [0,1], [0,2], [1,0], [1,1] ],
-    ];
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const collideBtn = document.getElementById('collideBtn');
+            const leftEgg = document.querySelector('.left-egg');
+            const rightEgg = document.querySelector('.right-egg');
+            const collisionPoint = document.querySelector('.collision-point');
+            const message = document.getElementById('message');
+            const shell1 = document.getElementById('shell1');
+            const shell2 = document.getElementById('shell2');
+            
+            // Пасхальные поздравления и пожелания
+            const paschalWishes = [
+                // Традиционные пасхальные поздравления
+                "Христос Воскрес! Воистину Воскрес! ✝️",
+                "Светлого праздника Пасхи! Пусть в вашем доме будет благодать! 🕊️",
+                "Радости, мира и благоденствия в этот Светлый Праздник! 🌟",
+                "Пусть Воскресение Христово принесет в ваш дом счастье и благополучие! 🏠",
+                "Светлой Пасхи! Пусть ангел-хранитель оберегает вас и вашу семью! 👼",
+                "Пасхального настроения, тепла и уюта вашему дому! 🏡",
+                "Пусть пасхальная радость наполнит ваше сердце! 💖",
+                "Желаю крепкого здоровья и душевного спокойствия! 🌿",
+                
+                // Веселые пожелания
+                "Не подавись куличем! 🍞",
+                "Яйца не теряй! 💀",
+                "Чтобы все пасхальные угощения были вкусными! 🍴",
+                "Cтукнемся еще раз? 🤞",
+                "Чтобы пасхальный заяц принес много подарков! 🐰🎁",                
+                "Чтобы яйца не кончались! 🥚🥚🥚",
+                "Чтобы все яйца при катании выигрывали! 🏆"
+            ];
 
-    // Directions for adjacency checks (up, down, left, right)
-    const DIRECTIONS = [
-      [-1, 0],
-      [1, 0],
-      [0, -1],
-      [0, 1]
-    ];
+            let usedWishes = [];
+            let clickCount = 0;
 
-    // ---------------------
-    // On Load, ask for nickname & start
-    // ---------------------
-    window.onload = () => {
-      nickname = prompt("Please enter your nickname:") || "Guest";
-      document.addEventListener("keydown", handleKeyPress);
-      spawnNewPiece();
-      requestAnimationFrame(update);
-    };
+            function getRandomWish() {
+                // Фильтруем уже использованные пожелания
+                const availableWishes = paschalWishes.filter(wish => 
+                    !usedWishes.includes(wish)
+                );
 
-    function update(timestamp) {
-      if (gameOver) return;
+                // Если все пожелания использованы, начинаем сначала
+                if (availableWishes.length === 0) {
+                    usedWishes = [];
+                    return paschalWishes[Math.floor(Math.random() * paschalWishes.length)];
+                }
 
-      // Drop piece automatically
-      if (timestamp - lastDropTime > dropInterval) {
-        moveDown();
-        lastDropTime = timestamp;
-      }
+                // Выбираем случайное пожелание
+                const randomIndex = Math.floor(Math.random() * availableWishes.length);
+                const selectedWish = availableWishes[randomIndex];
+                
+                // Запоминаем использованные пожелания (не более 5)
+                usedWishes.push(selectedWish);
+                if (usedWishes.length > 5) {
+                    usedWishes.shift();
+                }
+                
+                return selectedWish;
+            }
 
-      drawBoard();
-      drawCurrentPiece();
-      requestAnimationFrame(update);
-    }
+            function resetEggs() {
+                // Возвращаем яйца в исходное состояние
+                leftEgg.textContent = '🥚';
+                rightEgg.textContent = '🥚';
+                leftEgg.style.opacity = '1';
+                rightEgg.style.opacity = '1';
+                leftEgg.style.transform = 'translateY(-50%)';
+                rightEgg.style.transform = 'translateY(-50%)';
+                leftEgg.classList.remove('break');
+                rightEgg.classList.remove('break');
+                
+                // Прячем осколки
+                shell1.style.opacity = '0';
+                shell2.style.opacity = '0';
+                
+                message.textContent = 'Нажмите кнопку еще раз!';
+            }
 
-    // ---------------------
-    // Board / Pieces
-    // ---------------------
-    function createEmptyBoard(rows, cols) {
-      let arr = [];
-      for (let r = 0; r < rows; r++) {
-        let row = [];
-        for (let c = 0; c < cols; c++) {
-          row.push(null);
-        }
-        arr.push(row);
-      }
-      return arr;
-    }
-
-    function spawnNewPiece() {
-      const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-      
-      // Each block in the shape gets its own random color
-      let blocks = shape.map(() => getRandomColor());
-
-      currentPiece = {
-        row: 0,
-        col: Math.floor(COLS / 2) - 1,
-        shape: shape,
-        colors: blocks
-      };
-      
-      // If the piece cannot be placed at spawn, game over
-      if (collision(currentPiece, 0, 0)) {
-        gameOver = true;
-        alert("Game Over!");
-        // Save data to server
-        saveResultToServer();
-      }
-    }
-
-    function drawBoard() {
-      // Clear canvas
-      CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
-
-      // Draw placed cells
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          if (board[r][c]) {
-            drawCell(c, r, board[r][c]);
-          }
-        }
-      }
-    }
-
-    function drawCurrentPiece() {
-      if (!currentPiece) return;
-      const { row, col, shape, colors } = currentPiece;
-
-      shape.forEach((block, index) => {
-        const [br, bc] = block;
-        const cellRow = row + br;
-        const cellCol = col + bc;
-        drawCell(cellCol, cellRow, colors[index]);
-      });
-    }
-
-    function drawCell(x, y, color) {
-      CTX.fillStyle = color;
-      CTX.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-      // Optional outline
-      CTX.strokeStyle = "#333";
-      CTX.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-    }
-
-    // ---------------------
-    // Movement & Rotation
-    // ---------------------
-    function moveDown() {
-      if (!currentPiece) return;
-      if (!collision(currentPiece, 1, 0)) {
-        currentPiece.row++;
-      } else {
-        // Place piece on board
-        placePiece();
-        // Check for matches
-        checkMatchesAndClear();
-        // Spawn new piece
-        spawnNewPiece();
-      }
-    }
-
-    function moveLeft() {
-      if (!collision(currentPiece, 0, -1)) {
-        currentPiece.col--;
-      }
-    }
-
-    function moveRight() {
-      if (!collision(currentPiece, 0, 1)) {
-        currentPiece.col++;
-      }
-    }
-
-    function rotatePiece() {
-      // Naive rotation around shape's origin
-      const shape = currentPiece.shape.map(([r, c]) => [c, -r]);
-      const oldShape = currentPiece.shape;
-      currentPiece.shape = shape;
-
-      // Revert if it collides
-      if (collision(currentPiece, 0, 0)) {
-        currentPiece.shape = oldShape;
-      }
-    }
-
-    function collision(piece, dr, dc) {
-      const { row, col, shape } = piece;
-      for (let i = 0; i < shape.length; i++) {
-        const [br, bc] = shape[i];
-        const newR = row + br + dr;
-        const newC = col + bc + dc;
-        // Check boundaries
-        if (newR < 0 || newR >= ROWS || newC < 0 || newC >= COLS) {
-          return true;
-        }
-        // Check existing block
-        if (board[newR][newC]) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function placePiece() {
-      const { row, col, shape, colors } = currentPiece;
-      shape.forEach((block, index) => {
-        const [br, bc] = block;
-        const r = row + br;
-        const c = col + bc;
-        board[r][c] = colors[index];
-      });
-    }
-
-    // ---------------------
-    // Match-3 Clearing
-    // ---------------------
-    function checkMatchesAndClear() {
-      let toRemove = [];
-
-      for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-          const color = board[r][c];
-          if (!color) continue;
-
-          const connectedCells = getConnectedCells(r, c, color);
-          if (connectedCells.length >= MATCH_COUNT) {
-            toRemove = toRemove.concat(connectedCells);
-          }
-        }
-      }
-
-      // Remove duplicates
-      const uniqueRemovals = Array.from(new Set(toRemove.map(cell => cell.join(','))))
-        .map(str => str.split(',').map(Number));
-
-      // Clear them out
-      uniqueRemovals.forEach(([rr, cc]) => {
-        board[rr][cc] = null;
-      });
-
-      if (uniqueRemovals.length > 0) {
-        score += uniqueRemovals.length;
-        SCORE_ELEM.textContent = score;
-        applyGravity();
-        checkMatchesAndClear();
-      }
-    }
-
-    function getConnectedCells(row, col, color) {
-      let stack = [[row, col]];
-      let connected = [];
-      let visited = new Set([`${row},${col}`]);
-
-      while (stack.length) {
-        const [r, c] = stack.pop();
-        connected.push([r, c]);
-        for (let [dr, dc] of DIRECTIONS) {
-          const rr = r + dr;
-          const cc = c + dc;
-          if (
-            rr >= 0 && rr < ROWS &&
-            cc >= 0 && cc < COLS &&
-            board[rr][cc] === color &&
-            !visited.has(`${rr},${cc}`)
-          ) {
-            visited.add(`${rr},${cc}`);
-            stack.push([rr, cc]);
-          }
-        }
-      }
-      return connected;
-    }
-
-    function applyGravity() {
-      for (let c = 0; c < COLS; c++) {
-        let writeRow = ROWS - 1;
-        for (let r = ROWS - 1; r >= 0; r--) {
-          if (board[r][c]) {
-            board[writeRow][c] = board[r][c];
-            writeRow--;
-          }
-        }
-        for (let r = writeRow; r >= 0; r--) {
-          board[r][c] = null;
-        }
-      }
-    }
-
-    // ---------------------
-    // Input Handling
-    // ---------------------
-    function handleKeyPress(e) {
-      if (!currentPiece) return;
-      switch(e.key) {
-        case "ArrowLeft":
-          moveLeft();
-          break;
-        case "ArrowRight":
-          moveRight();
-          break;
-        case "ArrowDown":
-          moveDown();
-          break;
-        case "ArrowUp":
-          rotatePiece();
-          break;
-        default:
-          break;
-      }
-    }
-
-    // ---------------------
-    // Utilities
-    // ---------------------
-    function getRandomColor() {
-      const colors = [
-        "#FF0000", // Red
-        "#00FF00", // Green
-        "#0000FF", // Blue
-        "#FFFF00", // Yellow
-        "#FF00FF"  // Magenta / Purple
-      ];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
-
-    // ---------------------
-    // Save to Server
-    // ---------------------
-    function saveResultToServer() {
-      const now = new Date().toLocaleString();
-      const data = {
-        nickname: nickname,
-        result: score,
-        time: now
-      };
-
-      fetch("/api/save-result", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to save result to server");
-        }
-        return res.json();
-      })
-      .then((json) => {
-        console.log("Server response:", json);
-      })
-      .catch((err) => {
-        console.error("Error saving result:", err);
-      });
-    }
-  </script>
+            collideBtn.addEventListener('click', function() {
+                clickCount++;
+                
+                // Сбрасываем перед новой анимацией
+                resetEggs();
+                collisionPoint.style.opacity = '0';
+                
+                // Позиционируем осколки в точке столкновения
+                shell1.style.left = '45%';
+                shell1.style.top = '50%';
+                shell2.style.left = '55%';
+                shell2.style.top = '50%';
+                
+                // Двигаем яйца к центру
+                leftEgg.style.transform = 'translateX(80%) translateY(-50%)';
+                rightEgg.style.transform = 'translateX(-80%) translateY(-50%)';
+                
+                // Эффект столкновения
+                setTimeout(() => {
+                    collisionPoint.style.opacity = '1';
+                    leftEgg.classList.add('crack');
+                    rightEgg.classList.add('crack');
+                    
+                    // Разбиваем яйца после столкновения
+                    setTimeout(() => {
+                        // Прячем целые яйца
+                        leftEgg.classList.add('break');
+                        rightEgg.classList.add('break');
+                        
+                        // Показываем осколки
+                        shell1.textContent = ['🍳', '🧁', '🍬', '🍫'][Math.floor(Math.random()*4)];
+                        shell2.textContent = ['🍳', '🧁', '🍬', '🍫'][Math.floor(Math.random()*4)];
+                        shell1.style.opacity = '1';
+                        shell2.style.opacity = '1';
+                        
+                        // Разлетающиеся осколки
+                        shell1.style.transform = 'translate(-100%, -50%) rotate(-30deg)';
+                        shell2.style.transform = 'translate(100%, -50%) rotate(30deg)';
+                        
+                        // Показываем поздравление
+                        message.textContent = getRandomWish();
+                        
+                        // Прячем эффект столкновения
+                        setTimeout(() => {
+                            collisionPoint.style.opacity = '0';
+                        }, 1000);
+                        
+                        // Автоматический сброс через 3 секунды
+                        setTimeout(resetEggs, 10000);
+                    }, 500);
+                }, 500);
+            });
+            
+            // Ручной сброс при клике на яйца
+            leftEgg.addEventListener('click', resetEggs);
+            rightEgg.addEventListener('click', resetEggs);
+        });
+    </script>
 </body>
 </html>
