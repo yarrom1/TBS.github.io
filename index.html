@@ -211,8 +211,7 @@
             
             // Пасхальные поздравления и пожелания
             const paschalWishes = [
-                // Традиционные пасхальные поздравления
-                "Христос Воскрес! Воистину Воскрес! ✝️",
+            "Христос Воскрес! Воистину Воскрес! ✝️",
                 "Светлого праздника Пасхи! Пусть в вашем доме будет благодать! 🕊️",
                 "Радости, мира и благоденствия в этот Светлый Праздник! 🌟",
                 "Пусть Воскресение Христово принесет в ваш дом счастье и благополучие! 🏠",
@@ -233,34 +232,24 @@
 
             let usedWishes = [];
             let clickCount = 0;
+            let resetTimer = null;
 
             function getRandomWish() {
-                // Фильтруем уже использованные пожелания
-                const availableWishes = paschalWishes.filter(wish => 
-                    !usedWishes.includes(wish)
-                );
-
-                // Если все пожелания использованы, начинаем сначала
+                const availableWishes = paschalWishes.filter(wish => !usedWishes.includes(wish));
                 if (availableWishes.length === 0) {
                     usedWishes = [];
                     return paschalWishes[Math.floor(Math.random() * paschalWishes.length)];
                 }
-
-                // Выбираем случайное пожелание
                 const randomIndex = Math.floor(Math.random() * availableWishes.length);
                 const selectedWish = availableWishes[randomIndex];
-                
-                // Запоминаем использованные пожелания (не более 5)
                 usedWishes.push(selectedWish);
-                if (usedWishes.length > 5) {
-                    usedWishes.shift();
-                }
-                
+                if (usedWishes.length > 5) usedWishes.shift();
                 return selectedWish;
             }
 
             function resetEggs() {
-                // Возвращаем яйца в исходное состояние
+                clearTimeout(resetTimer);
+                
                 leftEgg.textContent = '🥚';
                 rightEgg.textContent = '🥚';
                 leftEgg.style.opacity = '1';
@@ -270,7 +259,6 @@
                 leftEgg.classList.remove('break');
                 rightEgg.classList.remove('break');
                 
-                // Прячем осколки
                 shell1.style.opacity = '0';
                 shell2.style.opacity = '0';
                 
@@ -278,13 +266,16 @@
             }
 
             collideBtn.addEventListener('click', function() {
+                // Сброс предыдущего таймера
+                clearTimeout(resetTimer);
+                
                 clickCount++;
                 
                 // Сбрасываем перед новой анимацией
                 resetEggs();
                 collisionPoint.style.opacity = '0';
                 
-                // Позиционируем осколки в точке столкновения
+                // Позиционируем осколки
                 shell1.style.left = '45%';
                 shell1.style.top = '50%';
                 shell2.style.left = '55%';
@@ -300,9 +291,8 @@
                     leftEgg.classList.add('crack');
                     rightEgg.classList.add('crack');
                     
-                    // Разбиваем яйца после столкновения
+                    // Разбиваем яйца
                     setTimeout(() => {
-                        // Прячем целые яйца
                         leftEgg.classList.add('break');
                         rightEgg.classList.add('break');
                         
@@ -324,15 +314,21 @@
                             collisionPoint.style.opacity = '0';
                         }, 1000);
                         
-                        // Автоматический сброс через 3 секунды
-                        setTimeout(resetEggs, 10000);
+                        // Устанавливаем таймер автосброса (3 секунды)
+                        resetTimer = setTimeout(resetEggs, 5000);
                     }, 500);
                 }, 500);
             });
             
-            // Ручной сброс при клике на яйца
-            leftEgg.addEventListener('click', resetEggs);
-            rightEgg.addEventListener('click', resetEggs);
+            // Ручной сброс
+            leftEgg.addEventListener('click', function() {
+                clearTimeout(resetTimer);
+                resetEggs();
+            });
+            rightEgg.addEventListener('click', function() {
+                clearTimeout(resetTimer);
+                resetEggs();
+            });
         });
     </script>
 </body>
